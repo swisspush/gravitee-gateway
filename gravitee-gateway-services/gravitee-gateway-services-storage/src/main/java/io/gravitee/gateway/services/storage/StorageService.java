@@ -25,15 +25,14 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.swisspush.reststorage.RestStorageMod;
 import org.swisspush.reststorage.util.ModuleConfiguration;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Starts one or more resource storages.
@@ -69,9 +68,10 @@ public class StorageService extends AbstractService {
         super.doStart();
 
         verticleIds =
-                Stream.of(environment.getPropertySources().iterator())
-                        .filter(source -> source instanceof EnumerablePropertySource)
+                StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(environment.getPropertySources().iterator(), Spliterator.ORDERED), false)
                         // get all matching property names
+                        .filter(source -> source instanceof EnumerablePropertySource)
                         .flatMap(source ->
                                 Stream.of(((EnumerablePropertySource) source).getPropertyNames())
                                         .map(PROPERTY_PATTERN::matcher)
@@ -91,7 +91,7 @@ public class StorageService extends AbstractService {
                         .collect(Collectors.toList());
 
         // starts the default storage with default config if nothing configured
-        if(verticleIds.isEmpty()) {
+        if (verticleIds.isEmpty()) {
             verticleIds = Collections.singletonList(createStorage(defaultConfig("default")));
         }
     }
@@ -117,12 +117,13 @@ public class StorageService extends AbstractService {
 
     private JsonObject defaultConfig(String name) {
         return ModuleConfiguration.with()
-                .collectionsPrefix("storage:"+name+":collections")
-                .deltaEtagsPrefix("storage:"+name+":delta:etags")
-                .deltaResourcesPrefix("storage:"+name+":delta:resources")
-                .expirablePrefix("storage:"+name+":expirable")
-                .lockPrefix("storage:"+name+":locks")
-                .storageAddress("io.gravitee.gateway.services.storage."+name)
+                .collectionsPrefix("storage:" + name + ":collections")
+                .resourcesPrefix("storage:" + name + ":resources")
+                .deltaEtagsPrefix("storage:" + name + ":delta:etags")
+                .deltaResourcesPrefix("storage:" + name + ":delta:resources")
+                .expirablePrefix("storage:" + name + ":expirable")
+                .lockPrefix("storage:" + name + ":locks")
+                .storageAddress("io.gravitee.gateway.services.storage." + name)
                 .storageType(ModuleConfiguration.StorageType.redis)
                 .build()
                 .asJsonObject();
