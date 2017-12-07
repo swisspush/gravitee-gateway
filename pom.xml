@@ -47,6 +47,7 @@
         <module>gravitee-gateway-handlers</module>
         <module>gravitee-gateway-services</module>
         <module>gravitee-gateway-security</module>
+        <module>gravitee-gateway-gateleen-core</module>
     </modules>
 
     <dependencyManagement>
