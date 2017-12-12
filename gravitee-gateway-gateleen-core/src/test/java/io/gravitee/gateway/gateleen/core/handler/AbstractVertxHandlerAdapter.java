@@ -15,25 +15,26 @@
  */
 package io.gravitee.gateway.gateleen.core.handler;
 
-import io.gravitee.gateway.api.buffer.Buffer;
 import io.vertx.core.Handler;
 
+import java.util.function.Function;
+
 /**
+ * Connects gravitee handlers to vertx handlers.
+ *
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public class BufferHandlerAdapter extends AbstractHandlerAdapter<Buffer, io.vertx.core.buffer.Buffer> {
+public abstract class AbstractVertxHandlerAdapter<T, U> implements Function<T,U>, Handler<T> {
 
-    public BufferHandlerAdapter(Handler<io.vertx.core.buffer.Buffer> handler) {
-        super(handler);
+    private io.gravitee.gateway.api.handler.Handler<U> handler;
+
+    public AbstractVertxHandlerAdapter(io.gravitee.gateway.api.handler.Handler<U> handler) {
+        this.handler = handler;
     }
 
     @Override
-    public io.vertx.core.buffer.Buffer apply(Buffer buffer) {
-        Object nativeBuffer = buffer.getNativeBuffer();
-        if(nativeBuffer instanceof io.vertx.core.buffer.Buffer) {
-            return (io.vertx.core.buffer.Buffer)nativeBuffer;
-        } else {
-            return io.vertx.core.buffer.Buffer.buffer(buffer.getBytes());
-        }
+    public void handle(T t) {
+        handler.handle(apply(t));
     }
+
 }

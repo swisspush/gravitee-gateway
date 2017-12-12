@@ -17,12 +17,14 @@ package io.gravitee.gateway.gateleen.core.handler;
 
 import io.gravitee.gateway.api.handler.Handler;
 
+import java.util.function.Function;
+
 /**
  * Connects gravitee handlers to vertx handlers.
  *
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public abstract class AbstractHandlerAdapter<T, U> implements Handler<T> {
+public abstract class AbstractHandlerAdapter<T, U> implements Function<T, U>, Handler<T> {
 
     private io.vertx.core.Handler<U> handler;
 
@@ -32,8 +34,6 @@ public abstract class AbstractHandlerAdapter<T, U> implements Handler<T> {
 
     @Override
     public void handle(T t) {
-        handler.handle(convert(t));
+        handler.handle(apply(t));
     }
-
-    protected abstract U convert(T t);
 }

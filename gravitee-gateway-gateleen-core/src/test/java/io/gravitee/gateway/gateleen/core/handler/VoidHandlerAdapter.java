@@ -26,7 +26,7 @@ public class VoidHandlerAdapter extends AbstractHandlerAdapter<Void, Void> {
     }
 
     @Override
-    protected Void convert(Void aVoid) {
+    public Void apply(Void aVoid) {
         return null;
     }
 }
