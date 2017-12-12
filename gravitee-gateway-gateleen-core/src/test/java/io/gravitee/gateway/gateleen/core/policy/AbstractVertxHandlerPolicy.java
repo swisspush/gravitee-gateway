@@ -23,7 +23,7 @@ import io.gravitee.policy.api.annotations.OnRequest;
 import io.vertx.core.http.HttpServerRequest;
 
 /**
- * A base class for policies delegating their job to an Vert.x request handler, optionally skipping next policies.
+ * A base class for policies delegating their job to a Vert.x request handler, optionally skipping next policies.
  *
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
@@ -33,17 +33,15 @@ public abstract class AbstractVertxHandlerPolicy {
 
     @OnRequest
     public void onRequest(Request request, Response response, PolicyChain policyChain, ExecutionContext executionContext) {
-        // Skip if another response invoker has been registered
+        // Skip if another response invoker has already been registered
         if (!(executionContext.getAttribute(ExecutionContext.ATTR_INVOKER) instanceof ProxyResponseInvoker)) {
             HttpServerRequestAdapter requestAdapter = new HttpServerRequestAdapter(request);
             ProxyResponseInvoker invoker = new ProxyResponseInvoker();
             requestAdapter.setProxyResponseHandler(invoker);
             if (handle(requestAdapter)) {
                 executionContext.setAttribute(ExecutionContext.ATTR_INVOKER, invoker);
-                policyChain.doNext(request, response); // will be replaced by doBreak
             }
-        } else {
-            policyChain.doNext(request, response);
         }
+        policyChain.doNext(request, response);
     }
 }

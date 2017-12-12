@@ -33,6 +33,7 @@ import java.util.Queue;
  */
 public class HttpServerResponseAdapter implements HttpServerResponse {
 
+    private int status;
     private MultiMap headers = new CaseInsensitiveHeaders();
     private Queue<Buffer> data;
 
@@ -59,12 +60,13 @@ public class HttpServerResponseAdapter implements HttpServerResponse {
 
     @Override
     public int getStatusCode() {
-        return 0;
+        return status;
     }
 
     @Override
     public HttpServerResponse setStatusCode(int statusCode) {
-        return null;
+        this.status = statusCode;
+        return this;
     }
 
     @Override
@@ -292,6 +294,8 @@ public class HttpServerResponseAdapter implements HttpServerResponse {
             public ProxyResponse endHandler(io.gravitee.gateway.api.handler.Handler<Void> handler) {
                 return this;
             }
+
+
         };
     }
 }

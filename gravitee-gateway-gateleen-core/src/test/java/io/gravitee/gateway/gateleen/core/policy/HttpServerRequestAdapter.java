@@ -131,7 +131,7 @@ public class HttpServerRequestAdapter implements HttpServerRequest {
 
     @Override
     public HttpServerResponse response() {
-        return response();
+        return response;
     }
 
     @Override
