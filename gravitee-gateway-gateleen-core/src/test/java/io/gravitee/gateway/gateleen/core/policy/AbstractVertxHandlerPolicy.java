@@ -20,24 +20,28 @@ import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.annotations.OnRequest;
+import io.vertx.core.http.HttpServerRequest;
 
 /**
- * A base class for policies delegating their job to an invoker, skipping next policies.
+ * A base class for policies delegating their job to an Vert.x request handler, optionally skipping next policies.
  *
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public abstract class AbstractBreakPolicy {
+public abstract class AbstractVertxHandlerPolicy {
 
-    protected abstract BreakPolicyInvoker createInvoker();
+    protected abstract boolean handle(HttpServerRequest request);
 
     @OnRequest
     public void onRequest(Request request, Response response, PolicyChain policyChain, ExecutionContext executionContext) {
-        // If not yet broken and break is needed for this request, installs the invoker and breaks.
-        BreakPolicyInvoker invoker = createInvoker();
-        if(!(executionContext.getAttribute(ExecutionContext.ATTR_INVOKER) instanceof BreakPolicyInvoker) &&
-                invoker.isBreaking(request)) {
-            executionContext.setAttribute(ExecutionContext.ATTR_INVOKER, invoker);
-            policyChain.doNext(request, response); // will be replaced by doBreak
+        // Skip if another response invoker has been registered
+        if (!(executionContext.getAttribute(ExecutionContext.ATTR_INVOKER) instanceof ProxyResponseInvoker)) {
+            HttpServerRequestAdapter requestAdapter = new HttpServerRequestAdapter(request);
+            ProxyResponseInvoker invoker = new ProxyResponseInvoker();
+            requestAdapter.setProxyResponseHandler(invoker);
+            if (handle(requestAdapter)) {
+                executionContext.setAttribute(ExecutionContext.ATTR_INVOKER, invoker);
+                policyChain.doNext(request, response); // will be replaced by doBreak
+            }
         } else {
             policyChain.doNext(request, response);
         }

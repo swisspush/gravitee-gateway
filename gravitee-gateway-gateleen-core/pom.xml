@@ -32,14 +32,9 @@
 
     <dependencies>
         <!-- Gravitee.io dependencies -->
-        <dependency>
-            <groupId>io.gravitee.gateway</groupId>
-            <artifactId>gravitee-gateway-reporting</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
-            <groupId>io.gravitee.gateway</groupId>
+            <groupId>io.gravitee.policy</groupId>
             <artifactId>gravitee-policy-api</artifactId>
         </dependency>
 
@@ -48,11 +43,27 @@
             <artifactId>gravitee-common</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.gravitee.gateway</groupId>
+            <artifactId>gravitee-gateway-reactor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Gateleen dependencies -->
+
+        <dependency>
+            <groupId>org.swisspush.gateleen</groupId>
+            <artifactId>gateleen-core</artifactId>
+            <version>1.1.10-SNAPSHOT</version>
+        </dependency>
+
         <!-- Vert.x dependencies -->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
+            <version>${vertx.version}</version>
         </dependency>
+
 
         <!-- Logging -->
         <dependency>

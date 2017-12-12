@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.gateway.gateleen.core.vertx;
+package io.gravitee.gateway.gateleen.core.policy;
 
 import io.gravitee.gateway.api.Request;
+import io.gravitee.gateway.api.proxy.ProxyResponse;
+import io.gravitee.gateway.gateleen.core.handler.BufferHandlerAdapter;
+import io.gravitee.gateway.gateleen.core.handler.VoidHandlerAdapter;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -36,6 +39,7 @@ public class HttpServerRequestAdapter implements HttpServerRequest {
     private Request request;
     private BufferHandlerAdapter bufferHandler;
     private VoidHandlerAdapter endHandler;
+    private HttpServerResponseAdapter response = new HttpServerResponseAdapter();
 
     public HttpServerRequestAdapter(Request request) {
         this.request = request;
@@ -127,8 +131,7 @@ public class HttpServerRequestAdapter implements HttpServerRequest {
 
     @Override
     public HttpServerResponse response() {
-        // TODO
-        return null;
+        return response();
     }
 
     @Override
@@ -238,5 +241,9 @@ public class HttpServerRequestAdapter implements HttpServerRequest {
     @Override
     public HttpConnection connection() {
         throw new UnsupportedOperationException();
+    }
+
+    public void setProxyResponseHandler(io.gravitee.gateway.api.handler.Handler<ProxyResponse> handler) {
+        response.setProxyResponseHandler(handler);
     }
 }

@@ -15,34 +15,25 @@
  */
 package io.gravitee.gateway.gateleen.core.policy;
 
-import io.gravitee.gateway.gateleen.core.self.SelfInvoker;
-import io.gravitee.gateway.gateleen.core.vertx.HttpClientAdapter;
-import io.gravitee.gateway.gateleen.core.vertx.VertxBreakPolicyInvoker;
+import io.gravitee.gateway.gateleen.core.client.HttpClientAdapter;
 import io.vertx.core.http.HttpServerRequest;
-
-import java.util.function.Function;
 
 /**
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public class QueuePolicy extends AbstractBreakPolicy {
-
-    SelfInvoker invoker = new SelfInvoker(null);
+public class QueuePolicy extends AbstractVertxHandlerPolicy {
 
     @Override
-    protected BreakPolicyInvoker createInvoker() {
-        return new VertxBreakPolicyInvoker(handler, invoker);
+    protected boolean handle(HttpServerRequest request) {
+        if (request.headers().contains("x-queue")) {
+            request.bodyHandler((buffer) -> {
+                new HttpClientAdapter(null); //...
+                request.response().write("hello");
+                request.response().end();
+            });
+            return true;
+        } else {
+            return false;
+        }
     }
-
-    private static Function<HttpServerRequest, Boolean> handler =
-            (httpServerRequest) -> {
-                if (httpServerRequest.headers().contains("x-queue")) {
-                    httpServerRequest.bodyHandler((buffer) -> {
-                        new HttpClientAdapter();
-                    });
-                    return true;
-                } else {
-                    return false;
-                }
-            };
 }

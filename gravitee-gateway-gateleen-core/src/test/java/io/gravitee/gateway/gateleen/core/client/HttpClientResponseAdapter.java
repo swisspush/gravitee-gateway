@@ -13,25 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.gateway.gateleen.core.vertx;
+package io.gravitee.gateway.gateleen.core.client;
 
-import io.gravitee.gateway.gateleen.core.self.SelfInvoker;
+import io.gravitee.common.http.HttpHeaders;
+import io.gravitee.gateway.api.Response;
+import io.gravitee.gateway.api.buffer.Buffer;
+import io.gravitee.gateway.api.stream.WriteStream;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.http.HttpMethod;
-import org.swisspush.gateleen.core.http.AbstractHttpClient;
 
 /**
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public class HttpClientAdapter extends AbstractHttpClient {
-
-    public HttpClientAdapter() {
+public class HttpClientResponseAdapter implements Response, io.gravitee.gateway.api.handler.Handler<Response> {
+    public HttpClientResponseAdapter(Handler<HttpClientResponse> handler) {
     }
 
     @Override
-    protected HttpClientRequest doRequest(HttpMethod httpMethod, String user, Handler<HttpClientResponse> handler) {
+    public Response status(int i) {
         return null;
+    }
+
+    @Override
+    public int status() {
+        return 0;
+    }
+
+    @Override
+    public HttpHeaders headers() {
+        return null;
+    }
+
+    @Override
+    public void handle(Response response) {
+
+    }
+
+    @Override
+    public WriteStream<Buffer> write(Buffer buffer) {
+        return null;
+    }
+
+    @Override
+    public void end() {
+
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.gateway.gateleen.core.self;
+package io.gravitee.gateway.gateleen.core.policy;
 
 import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Invoker;
@@ -24,69 +24,54 @@ import io.gravitee.gateway.api.proxy.ProxyConnection;
 import io.gravitee.gateway.api.proxy.ProxyResponse;
 import io.gravitee.gateway.api.stream.ReadStream;
 import io.gravitee.gateway.api.stream.WriteStream;
-import io.gravitee.gateway.reactor.Reactor;
 
 /**
- * An invoker performing an internal request through the reactor.
+ * An invoker that just streams back a proxy response.
  *
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public class SelfInvoker implements Invoker {
+public class ProxyResponseInvoker implements Invoker, Handler<ProxyResponse> {
 
-    private Reactor reactor;
-
-    public SelfInvoker(Reactor reactor) {
-        this.reactor = reactor;
-    }
-
-    protected Request getRequest(Request serverRequest) {
-        return serverRequest;
-    }
-
-    protected ReadStream getReadStream(ReadStream<Buffer> serverRequestStream) {
-        return serverRequestStream;
-    }
+    private ProxyResponse response;
+    private Handler<ProxyResponse> responseHandler;
 
     @Override
-    public Request invoke(ExecutionContext executionContext, Request serverRequest, ReadStream<Buffer> serverRequestStream, Handler<ProxyConnection> connectionHandler) {
-
-        SelfResponse selfResponse = new SelfResponse();
-
+    public Request invoke(ExecutionContext executionContext,
+                          Request request,
+                          ReadStream<Buffer> readStream,
+                          Handler<ProxyConnection> connectionHandler) {
         ProxyConnection proxyConnection = new ProxyConnection() {
-
             @Override
             public WriteStream<Buffer> write(Buffer buffer) {
-                return null;
+                // ignore
+                return this;
             }
 
             @Override
             public void end() {
-
-            }
-
-            @Override
-            public ProxyConnection cancel() {
-                return null;
-            }
-
-            @Override
-            public ProxyConnection exceptionHandler(Handler<Throwable> exceptionHandler) {
-                return this;
+                // ignore
             }
 
             @Override
             public ProxyConnection responseHandler(Handler<ProxyResponse> handler) {
-                selfResponse.setResponseHandler(handler);
+                if(response != null) {
+                    handler.handle(response);
+                } else {
+                    responseHandler = handler;
+                }
                 return this;
             }
         };
-
         connectionHandler.handle(proxyConnection);
-        reactor.route(
-                new SelfRequest(serverRequest, serverRequestStream),
-                selfResponse,
-                selfResponse);
+        return request;
+    }
 
-        return serverRequest;
+    @Override
+    public void handle(ProxyResponse proxyResponse) {
+        if(responseHandler != null) {
+            responseHandler.handle(proxyResponse);
+        } else {
+            response = response;
+        }
     }
 }

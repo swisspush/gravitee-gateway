@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.gateway.gateleen.core.vertx;
+package io.gravitee.gateway.gateleen.core.handler;
 
-import io.gravitee.gateway.api.handler.Handler;
+import io.gravitee.gateway.api.buffer.Buffer;
+import io.vertx.core.Handler;
 
 /**
- * Connects gravitee handlers to vertx handlers.
- *
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
  */
-public abstract class AbstractHandlerAdapter<T, U> implements Handler<T> {
+public class BufferHandlerAdapter extends AbstractHandlerAdapter<Buffer, io.vertx.core.buffer.Buffer> {
 
-    private io.vertx.core.Handler<U> handler;
-
-    public AbstractHandlerAdapter(io.vertx.core.Handler<U> handler) {
-        this.handler = handler;
+    public BufferHandlerAdapter(Handler<io.vertx.core.buffer.Buffer> handler) {
+        super(handler);
     }
 
     @Override
-    public void handle(T t) {
-        handler.handle(convert(t));
+    protected io.vertx.core.buffer.Buffer convert(Buffer buffer) {
+        Object nativeBuffer = buffer.getNativeBuffer();
+        if(nativeBuffer instanceof io.vertx.core.buffer.Buffer) {
+            return (io.vertx.core.buffer.Buffer)nativeBuffer;
+        } else {
+            return io.vertx.core.buffer.Buffer.buffer(buffer.getBytes());
+        }
     }
-
-    protected abstract U convert(T t);
 }
