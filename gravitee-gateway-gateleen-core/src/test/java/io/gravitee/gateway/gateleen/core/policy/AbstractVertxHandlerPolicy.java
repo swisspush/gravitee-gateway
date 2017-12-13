@@ -20,6 +20,7 @@ import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.annotations.OnRequest;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 
 /**
@@ -29,16 +30,15 @@ import io.vertx.core.http.HttpServerRequest;
  */
 public abstract class AbstractVertxHandlerPolicy {
 
-    protected abstract boolean handle(HttpServerRequest request);
+    protected abstract boolean handle(Vertx vertx, HttpServerRequest request);
 
     @OnRequest
     public void onRequest(Request request, Response response, PolicyChain policyChain, ExecutionContext executionContext) {
         // Skip if another response invoker has already been registered
         if (!(executionContext.getAttribute(ExecutionContext.ATTR_INVOKER) instanceof ProxyResponseInvoker)) {
-            HttpServerRequestAdapter requestAdapter = new HttpServerRequestAdapter(request);
             ProxyResponseInvoker invoker = new ProxyResponseInvoker();
-            requestAdapter.setProxyResponseHandler(invoker);
-            if (handle(requestAdapter)) {
+            HttpServerRequestAdapter requestAdapter = new HttpServerRequestAdapter(request, invoker);
+            if (handle(executionContext.getComponent(Vertx.class), requestAdapter)) {
                 executionContext.setAttribute(ExecutionContext.ATTR_INVOKER, invoker);
             }
         }

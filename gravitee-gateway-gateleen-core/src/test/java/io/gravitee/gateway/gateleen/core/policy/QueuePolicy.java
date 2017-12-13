@@ -16,7 +16,9 @@
 package io.gravitee.gateway.gateleen.core.policy;
 
 import io.gravitee.gateway.gateleen.core.client.HttpClientAdapter;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Laurent Bovet <laurent.bovet@swisspush.org>
@@ -24,12 +26,16 @@ import io.vertx.core.http.HttpServerRequest;
 public class QueuePolicy extends AbstractVertxHandlerPolicy {
 
     @Override
-    protected boolean handle(HttpServerRequest request) {
+    protected boolean handle(Vertx vertx, HttpServerRequest request) {
         if (request.headers().contains("x-queue")) {
             request.bodyHandler((buffer) -> {
-                new HttpClientAdapter(null); //...
-                request.response().write("hello");
-                request.response().end();
+                request.response().headers().add("foo", "bar");
+                request.response().headers().add("Content-Type", "text/plain");
+                request.response().write("hello, ");
+                vertx.setTimer(600, (x) -> {
+                    request.response().write("world, ");
+                    request.response().end();
+                });
             });
             return true;
         } else {

@@ -39,10 +39,11 @@ public class HttpServerRequestAdapter implements HttpServerRequest {
     private Request request;
     private BufferHandlerAdapter bufferHandler;
     private VoidHandlerAdapter endHandler;
-    private HttpServerResponseAdapter response = new HttpServerResponseAdapter();
+    private HttpServerResponseAdapter response;
 
-    public HttpServerRequestAdapter(Request request) {
+    public HttpServerRequestAdapter(Request request, io.gravitee.gateway.api.handler.Handler<ProxyResponse> invoker) {
         this.request = request;
+        this.response =  new HttpServerResponseAdapter(invoker);
     }
 
     public BufferHandlerAdapter getBufferHandler() {
@@ -243,7 +244,4 @@ public class HttpServerRequestAdapter implements HttpServerRequest {
         throw new UnsupportedOperationException();
     }
 
-    public void setProxyResponseHandler(io.gravitee.gateway.api.handler.Handler<ProxyResponse> handler) {
-        response.setProxyResponseHandler(handler);
-    }
 }

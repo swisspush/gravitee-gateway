@@ -71,7 +71,7 @@ public class ProxyResponseInvoker implements Invoker, Handler<ProxyResponse> {
         if(responseHandler != null) {
             responseHandler.handle(proxyResponse);
         } else {
-            response = response;
+            response = proxyResponse;
         }
     }
 }
